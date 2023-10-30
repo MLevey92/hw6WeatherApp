@@ -23,7 +23,6 @@ function loadHistory () {
         searchHistory = localGet.split(",");
         searchHistory = searchHistory.reverse();
     }
-    console.log(searchHistory);
 }
 
 //Renders history div. limits to 5 buttons
@@ -100,6 +99,10 @@ function renderCurrent (city) {
             for (var i=0;i<data.list.length;i+=8) {
                 var divEl = $('<div>');
 
+                var dateEl = $('<h6>');
+                var date = data.list[i].dt_txt.split(" ");
+                dateEl.text(date[0]);
+
                 var tempEl = $('<p>');
                 tempEl.text('Temp: ' + data.list[i].main.temp + " °F");
 
@@ -109,6 +112,7 @@ function renderCurrent (city) {
                 var humEl = $('<p>');
                 humEl.text('Humidity: ' + data.list[i].main.humidity);
 
+                divEl.append(dateEl);
                 divEl.append(tempEl);
                 divEl.append(windEl);
                 divEl.append(humEl);
