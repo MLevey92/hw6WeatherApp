@@ -5,12 +5,15 @@ var results = $('#results');
 var current = $('#current');
 var forecast = $('#forecast');
 
+var lat;
+var lon;
+
 
 
 function renderCurrent (city) {
     current.empty();
 
-    var queryURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + APIKey + "&units=imperial";
+    var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + APIKey + "&units=imperial";
 
     fetch(queryURL)
     .then(function(response) {
@@ -37,10 +40,10 @@ function renderCurrent (city) {
         current.append(windEl);
         current.append(humEl);
         current.addClass("border p-2 m-2");
-
-        var lat = data.coord.lat;
-        var lon = data.coord.lon;
-        console.log("lat: " + lat + "lon: " + lon);
+        
+        lat = data.coord.lat;
+        lon = data.coord.lon;
+        
 
         var queryURL2 = "api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey;
         //5 day forecast call; only takes lat and lon
@@ -51,9 +54,11 @@ function renderCurrent (city) {
         .then(function(data) {
             console.log(data);
         });
+        
 
     });
 
+    console.log("lat: " + lat + "lon: " + lon);
 }
 
 function handleSearch(e) {
