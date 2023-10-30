@@ -25,11 +25,11 @@ function loadHistory () {
     }
 }
 
-//Renders history div. limits to 5 buttons
+//Renders history div. limits to 10 buttons
 function renderHistory () {
     historyEl.empty();
     
-    if (searchHistory.length<5) {
+    if (searchHistory.length<10) {
         for (i=0;i<searchHistory.length;i++) {
             var buttonEl = $('<button>');
             buttonEl.text(searchHistory[i]);
@@ -69,7 +69,7 @@ function renderCurrent (city) {
         windEl.text('Wind: ' + data.wind.speed + " MPH");
 
         var humEl = $('<p>');
-        humEl.text('Humidity: ' + data.main.humidity);
+        humEl.text('Humidity: ' + data.main.humidity + " %");
 
         current.append(titleEl);
         current.append(tempEl);
@@ -89,7 +89,6 @@ function renderCurrent (city) {
             return response.json();
         })
         .then(function(data) {
-            console.log(data);
             //render 5-day forecast
             forecast.empty();
 
@@ -98,6 +97,12 @@ function renderCurrent (city) {
             forecast.append(titleEl);
             for (var i=0;i<data.list.length;i+=8) {
                 var divEl = $('<div>');
+
+                var iconEl = $('<img>');
+                var iconID = data.list[i].weather[0].icon;
+                iconEl.attr("src", "http://openweathermap.org/img/wn/"+ iconID + ".png");
+
+            
 
                 var dateEl = $('<h6>');
                 var date = data.list[i].dt_txt.split(" ");
@@ -110,9 +115,10 @@ function renderCurrent (city) {
                 windEl.text('Wind: ' + data.list[i].wind.speed + " MPH");
 
                 var humEl = $('<p>');
-                humEl.text('Humidity: ' + data.list[i].main.humidity);
+                humEl.text('Humidity: ' + data.list[i].main.humidity + " %");
 
                 divEl.append(dateEl);
+                divEl.append(iconEl);
                 divEl.append(tempEl);
                 divEl.append(windEl);
                 divEl.append(humEl);
@@ -165,5 +171,5 @@ clearHistoryBtn.on('click', function () {
 
 //user clicks on button to populate search bar from history
 historyEl.on('click', '.btn', function (e) {
-    cityInput.val(e.target.innerHTML);
+    renderCurrent(e.target.innerHTML);
 })
