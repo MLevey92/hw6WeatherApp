@@ -10,3 +10,8 @@ h1 {
 #searchPrompt{
     font-size: 2em;
 }
+
+.panel {
+    background-color: darkblue;
+    color: white;
+}

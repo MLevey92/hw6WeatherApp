@@ -4,10 +4,48 @@ var cityInput = $('#cityInput');
 var results = $('#results');
 var current = $('#current');
 var forecast = $('#forecast');
+var historyEl = $('#history');
+var clearHistoryBtn = $('#clearHistory');
 
 var lat;
 var lon;
 
+var searchHistory = [];
+
+//get cities from localstorage and render history
+loadHistory();
+renderHistory();
+
+//loads history array. reverses it so that recent is at the top
+function loadHistory () {
+    var localGet = localStorage.getItem("cities");
+    if (localGet !== null) {
+        searchHistory = localGet.split(",");
+        searchHistory = searchHistory.reverse();
+    }
+    console.log(searchHistory);
+}
+
+//Renders history div. limits to 5 buttons
+function renderHistory () {
+    historyEl.empty();
+    
+    if (searchHistory.length<5) {
+        for (i=0;i<searchHistory.length;i++) {
+            var buttonEl = $('<button>');
+            buttonEl.text(searchHistory[i]);
+            buttonEl.addClass('btn btn-outline-secondary container-fluid m-1');
+            historyEl.append(buttonEl);
+        }
+    } else
+        for (i=0;i<5;i++) {
+            var buttonEl = $('<button>');
+            buttonEl.text(searchHistory[i]);
+            buttonEl.addClass('btn btn-outline-secondary container-fluid m-1');
+            historyEl.append(buttonEl);
+        }
+    
+}
 
 
 function renderCurrent (city) {
@@ -20,7 +58,6 @@ function renderCurrent (city) {
         return response.json();
     })
     .then(function(data) {
-        //console.log(data);
         
         //render current weather box
         var titleEl = $('<h1>');
@@ -45,29 +82,84 @@ function renderCurrent (city) {
         lon = data.coord.lon;
         
 
-        var queryURL2 = "api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey;
+        var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey + "&units=imperial";
         //5 day forecast call; only takes lat and lon
+        
         fetch(queryURL2)
         .then(function(response) {
             return response.json();
         })
         .then(function(data) {
             console.log(data);
+            //render 5-day forecast
+            forecast.empty();
+
+            var titleEl = $('<h1>');
+            titleEl.text("5-Day Forecast");
+            forecast.append(titleEl);
+            for (var i=0;i<data.list.length;i+=8) {
+                var divEl = $('<div>');
+
+                var tempEl = $('<p>');
+                tempEl.text('Temp: ' + data.list[i].main.temp + " °F");
+
+                var windEl = $('<p>');
+                windEl.text('Wind: ' + data.list[i].wind.speed + " MPH");
+
+                var humEl = $('<p>');
+                humEl.text('Humidity: ' + data.list[i].main.humidity);
+
+                divEl.append(tempEl);
+                divEl.append(windEl);
+                divEl.append(humEl);
+
+                divEl.addClass('panel border p-2 m-2 col-lg-2');
+
+                forecast.append(divEl);
+            }
         });
+        
         
 
     });
 
-    console.log("lat: " + lat + "lon: " + lon);
+    
 }
 
+//Gets city input, pushes to local storage history
 function handleSearch(e) {
     e.preventDefault();
 
     var city = cityInput.val();
-    renderCurrent(city);
+
+    if (city !== "") {
+        //push to local storage if not already there, add to search history and re-render history
+        if (!searchHistory.includes(city)) {
+            searchHistory.unshift(city);
+        }
+        localStorage.setItem("cities", searchHistory);
+        renderHistory();
+
+        renderCurrent(city);
+    }
+    
+  
 
     
 }
 
+//search button listener
 searchBtn.on('click', handleSearch);
+
+//clear button
+clearHistoryBtn.on('click', function () {
+    localStorage.clear();
+    searchHistory = [];
+    renderHistory();
+    historyEl.empty();
+})
+
+//user clicks on button to populate search bar from history
+historyEl.on('click', '.btn', function (e) {
+    cityInput.val(e.target.innerHTML);
+})
